@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+</head>
+
+<body id="page-top">
+<!-- Navigation -->
+<th:block th:include="fragments/nav"></th:block>
+
+
+<div class="container mt-5" style="min-height: 800px">
+    <h2 class="mb-5">글 목록</h2>
+    <table class="table table-hover table-bordered">
+        <thead class="thead-dark">
+        <tr class="text-center">
+            <th style="width: 7%">번호</th>
+            <th style="width: 34%">제목</th>
+            <th style="width: 13%">작성자</th>
+            <th style="width: 13%">날짜</th>
+            <th style="width: 10%">조회수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="content : ${contentList}">
+            <td th:text="${content.id}" class="text-center"></td>
+            <td><a class="board-title" th:text="${content.title}" th:href="@{'/board/' + ${content.getId()}}"></a></td>
+            <td th:text="${content.member.getNickname()}" class="text-center"></td>
+            <td th:text="${content.getCreateDate()}"
+                class="text-center"></td>
+            <td th:text="${content.getViewCount}" class="text-center"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="container">
+        <div align="right" class="container">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <ul class="pagination pagination-sm justify-content-center font-weight-bold"
+                            th:with="start=${T(Math).floor(contentList.number / 10) * 10 + 1},
+                            last=(${start + 9 < contentList.totalPages ? start + 9 : contentList.totalPages})">
+                            <li class="page-item text-center"
+                                th:classappend="${contentList.number - 1 eq 0} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{${'/board'}(page=${(contentList.number - 10) / 10 * 10 + 1})}"
+                                   aria-label="Previous" title="Previous Page" data-toggle="tooltip">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(start, last)}" class="page-item text-center"
+                                th:classappend="${i == contentList.number + 1} ? 'active'">
+                                <a class="page-link" th:href="@{${'/board'}(page=${i})}"
+                                   th:text="${i}"></a>
+                            </li>
+                            <li class="page-item text-center"
+                                th:classappend="${start + 10 > contentList.totalPages} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{${'/board'}(page=${(contentList.number + 10)/10*10+1})}">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <a th:href="@{/board/new}" th:if="${session.user != null}">
+                            <button class="btn btn-primary">글쓰기</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<th:block th:include="fragments/footer"></th:block>
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+    <script src="https://cdn.ckeditor.com/ckeditor5/17.0.0/classic/ckeditor.js"></script>
+</head>
+<body style="height: 1500px">
+<!-- nav include -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1 class="text-center">스터디 만들기</h1>
+    </div>
+</div>
+<div class="container">
+    <form id="form_study" th:action="@{/study/new}" onsubmit="return validate();" th:object="${studyForm}" method="post"
+          autocomplete="off">
+        <div class="form-group">
+            <label th:for="studyName">스터디 이름</label>
+            <input type="text" class="form-control" th:field="*{studyName}" id="form_title"
+                   placeholder="스터디 이름을 작성해주세요." maxlength="200">
+        </div>
+        <div class="form-group">
+            <label th:for="studyDesc">스터디 설명</label>
+            <textarea id="form_editor" class="form-control" th:field="*{studyDesc}" rows="5"
+                      placeholder="스터디 설명을 작성해주세요."></textarea>
+            <script>
+                let editor;
+                ClassicEditor
+                    .create(document.querySelector('#form_editor'), {
+                        removePlugins: ['ImageUpload'],
+                    })
+                    .then(newEditor => {
+                        editor = newEditor;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            </script>
+        </div>
+        <div class="form-group">
+            <label th:for="limitNum">스터디 정원</label>
+            <input id="form_people" min="1" type="number" class="form-control" th:field="*{limitNum}">
+        </div>
+        <div class="form-group" id="techstack">
+            <label th:for="tech">기술스택</label>
+            <div class="input-group">
+                <input type="text" class="form-inline w-25" placeholder="기술을 검색하세요 !" id="findData">
+                <button type="button" class="btn btn-outline-success" id="addTech">추 가</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col" id="techlist"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="button" class="btn btn-primary" id="submitbtn" value="만들기">
+        </div>
+    </form>
+</div>
+
+<!-- footer include -->
+<th:block th:include="fragments/footer"></th:block>
+
+<script type="text/javascript">
+    const limit_title = 4;
+
+    $(document).ready(function () {
+        $('#submitbtn').click(function () {
+            var title = $('#form_title').val().trim();
+            var content = editor.getData();
+            var people = $('#form_people').val();
+
+            if (title.length < limit_title) {
+                alert('공백없이 ' + limit_title + '글자 이상 입력해주세요.');
+                $('#form_title').focus();
+                return;
+            }
+            if (content.length == 0) {
+                alert('스터디 설명에 내용을 입력해주세요.');
+                $('.ck-editor__editable').focus();
+                return;
+            }
+            if (people == 0) {
+                alert('스터디 인원을 1명이상 지정해주세요.');
+                $('#form_people').focus();
+                return;
+            }
+            $('#form_study')[0].submit();
+        });
+
+        /* jQuery AutoComplete */
+        $('#findData').autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: 'get',
+                    url: "/study/techs/" + $('#findData').val(),
+                    dataType: "json",
+                    success: function (data) {
+                        response(
+                            $.map(data, function (item) {
+                                return {
+                                    label: item,
+                                }
+                            })
+                        );
+                    }
+                });
+            },
+            select: function (event, ui) {
+            },
+            focus: function (event, ui) {
+                return false;
+            },
+            minLength: 1,
+            autoFocus: true,
+            classes: {
+                "ui-autocomplete": "highlight"
+            },
+            delay: 400,
+            position: {my: "right top", at: "right bottom"},
+            close: function (event) {
+                console.log(event);
+            }
+        });
+
+        $('#addTech').click(function () {
+            var data = $('#findData').val().trim();
+
+            if (data.length == 0) {
+                return;
+            }
+            var newTag = '';
+            newTag += '<div class="techlist btn-group mb-1 mr-1">';
+            newTag += '  <button type="button" class="btn border-secondary">' + data + '</button>';
+            newTag += '  <input type="hidden" name="techs" value="' + data + '">';
+            newTag += '  <button type="button" class="rmTech btn btn-outline-warning border-secondary">';
+            newTag += '    <span aria-hidden="true">&times;</span>';
+            newTag += '  </button>';
+            newTag += '</div>';
+
+            $('#techlist').append(newTag);
+            $('#findData').val('');
+            $('#findData').focus();
+        });
+    });
+
+    $(document).on("click", ".rmTech", function () {
+        var idx = $('.rmTech').index(this);
+        $('.techlist')[idx].remove();
+    });
+</script>
+</body>
+</html>

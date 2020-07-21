@@ -1,0 +1,47 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.9.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group 'com.wyjax'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('mysql:mysql-connector-java')
+    compile('org.projectlombok:lombok')
+    compile('com.h2database:h2')
+
+    compile('org.springframework.boot:spring-boot-starter-oauth2-client')
+
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    compile('org.thymeleaf.extras:thymeleaf-extras-springsecurity5')
+    compile('org.springframework.session:spring-session-jdbc')
+    compile('org.springframework:spring-webmvc')
+    compile('com.navercorp.lucy:lucy-xss-servlet:2.0.1')
+    compile('org.apache.commons:commons-text:1.8')
+
+    compile('org.springframework.boot:spring-boot-devtools')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile("org.springframework.security:spring-security-test")
+}

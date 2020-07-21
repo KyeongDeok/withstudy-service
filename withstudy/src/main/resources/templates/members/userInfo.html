@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+</head>
+<body style="height: 1500px">
+<!-- nav include -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1 class="text-center">사용자 정보</h1>
+    </div>
+</div>
+<div class="container" th:with="isSelf = ${ userinfo?.name.equals(session.user?.name)}">
+    <div class="row justify-content-center">
+        <div class="col-2">
+            <img class="embed-responsive rounded-circle" th:src="${userinfo?.getPicture()}">
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col col-sm-6 col-md-4 text-right">아이디</div>
+        <div class="col col-sm-6 col-md-4" style="color: dimgray" th:text="${userinfo?.uid}"></div>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col col-xs-12 col-sm-6 col-md-4 text-right my-auto">닉네임</div>
+        <div class="col col-xs-12 col-sm-6 col-md-4" style="color: dimgray">
+            <a th:text="${userinfo?.getName()}"></a>
+            <button th:if="${isSelf}" type="button" id="change-btn" class="btn btn-primary" data-toggle="modal"
+                    data-target="#exampleModal">변경
+            </button>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col col-xs-12 col-sm-6 col-md-4 text-right">로그인서버</div>
+        <div class="col col-xs-12 col-sm-6 col-md-4" style="color: dimgray"
+             th:text="${userinfo?.getServerName()}"></div>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col col-xs-12 col-sm-6 col-md-4 text-right">최초 로그인</div>
+        <div class="col col-xs-12 col-sm-6 col-md-4" style="color: dimgray"
+             th:text="${userinfo?.createDate}"></div>
+    </div>
+
+    <div class="jumbotron rounded mt-5">
+        <div th:if="${isSelf}" class="input-group justify-content-center mb-4">
+            <label class="form-inline my-auto mx-2">라벨</label>
+            <input id="port_name" type="text" class="form-inline rounded w-25">
+            <label class="form-inline my-auto mx-2">URL</label>
+            <input id="port_url" type="text" class="form-inline rounded w-50 mr-2" value="http://">
+            <button id="port-save" class="btn btn-outline-primary form-inline">추 가</button>
+        </div>
+        <div id="portfolio_section">
+            <span class="port-list badge badge-secondary mr-2 mb-2" th:each="port : ${userinfo?.getPortFolioResDtos()}">
+                <a class="btn text-white mr-2" target="_blank" th:href="${port?.url}" th:text="${port?.name}"></a>
+                <a class="port-delete btn btn-dark text-white" th:if="${isSelf}" th:seq="${port?.id}">×</a>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">닉네임 변경</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="to_nickname" class="col-form-label">변경할 닉네임</label>
+                        <input type="text" class="form-control" id="to_nickname">
+                        <label id="server_msg" class="col-form-label"></label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="nickname-update" class="btn btn-primary">변경</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- user javascript -->
+<script th:src="@{/js/user.js}"></script>
+<!-- footer include -->
+<th:block th:include="fragments/footer"></th:block>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="header">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}">
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="google-site-verification" content="0bXZaV3wiI3GHrTd2193Uo47WGB8vwdw_GQOoVJYApE" />
+
+    <title>WITH STUDY</title>
+    <link th:href="@{/css/bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-164759250-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-164759250-1');
+    </script>
+</head>

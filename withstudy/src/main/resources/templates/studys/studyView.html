@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+</head>
+<body style="height: 1500px" class="bg-light">
+<!-- nav include -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1 class="text-center" th:text="${roomInfo.getRoomName()}"></h1>
+    </div>
+</div>
+<div class="container" th:with="sname = ${session.user?.getName()}, sid = ${session.user?.getUid()}">
+    <th:block th:with="ismember = ${roomInfo.getMembers().contains(sname)} or ${roomInfo.getRequests().contains(sid)},
+                       isleader = ${#strings.equals(roomInfo.getLeader(), sname)}">
+        <input type="hidden" id="roomNo" th:value="${roomInfo.getId()}">
+        <div class="container">
+            <div class="row justify-content-center mt-2">
+                <div class="col col-sm-2 col-md-5">
+                    <div class="row text-right">
+                        <div class="col col-sm-6">
+                            <label>스터디 리더</label>
+                        </div>
+                        <div class="col col-sm-6">
+                            <a class="right" style="color: dimgray" th:text="${roomInfo.getLeader()}"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2 col-md-5">
+                    <div class="row text-left">
+                        <div class="col col-sm-6">
+                            <label>개설 시간</label>
+                        </div>
+                        <div class="col col-sm-6">
+                            <a class="right" style="color: dimgray" th:text="${roomInfo.getDateTime()}"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-2">
+                <div class="col col-sm-2 col-md-5">
+                    <div class="row text-right">
+                        <div class="col col-sm-6">
+                            <label>스터디 상태</label>
+                        </div>
+                        <div class="col col-sm-6">
+                            <a class="right" style="color: dimgray" th:text="${roomInfo.status}"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2 col-md-5">
+                    <div class="row text-left">
+                        <div class="col col-sm-6">
+                            <label>스터디 인원</label>
+                        </div>
+                        <div class="col col-sm-6">
+                            <a class="right" style="color: dimgray"
+                               th:text="${roomInfo.getJoinNum()} + ' / ' + ${roomInfo.getLimitNum()}"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--   스터디 멤버   -->
+            <div class="row justify-content-center mt-2">
+                <div class="col col-sm-2 col-md-5">
+                    <div class="row text-right">
+                        <div class="col col-sm-6">
+                            <label>스터디 멤버</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2 col-md-5">
+                    <th:block th:each="member : ${roomInfo.getMembers()}">
+                        <a class="mr-2" style="color: dimgray" th:text="${member}"></a>
+                    </th:block>
+                </div>
+            </div>
+            <!--     스터디 신청자       -->
+            <div class="row justify-content-center mt-2" th:if="${roomInfo.leader?.equals(sname)}">
+                <button id="requestCheck" type="button" class="btn btn-info">
+                    신청확인
+                    <span id="requestSize" class="badge badge-light" th:text="${roomInfo.getRequests()?.size()}"></span>
+                </button>
+            </div>
+            <hr>
+            <!--   스터디 설명   -->
+            <div class="row justify-content-center mt-4">
+                <div class="col col-sm-8">
+                    <th:block th:each="tech : ${roomInfo.getTechlist()}">
+                        <button type="button" class="btn border-info mb-1" th:text="${tech}"></button>
+                    </th:block>
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col col-sm-8">스터디 설명</div>
+            </div>
+            <div class="row justify-content-center mt-4" style="min-height: 300px">
+                <div class="col col-sm-8" th:utext="${roomInfo.getRoomDesc()}"></div>
+            </div>
+        </div>
+        <!--  참여, 취소, 시작, 삭제 button  -->
+        <div class="container">
+            <div class="row justify-content-center mt-4">
+                <div class="col col-sm-8 text-right">
+                    <th:block
+                            th:if="${roomInfo.joinNum} < ${roomInfo.limitNum} and ${session.user != null} and !${ismember}">
+                        <input type="button" class="studybtn btn btn-primary" method="post" url="/study/members"
+                               value="신청">
+                    </th:block>
+                    <th:block th:if="${isleader} and ${roomInfo.getStatus().toString().equals('READY')}">
+                        <input type="button" class="studybtn btn btn-primary" method="put" url="/study/status"
+                               value="시작">
+                    </th:block>
+                    <th:block th:if="${isleader} and ${roomInfo.getStatus().toString().equals('READY')}">
+                        <input type="button" class="studybtn btn btn-danger" method="delete" url="/study/status"
+                               value="삭제">
+                    </th:block>
+                    <th:block th:if="${roomInfo.requests.contains(sid) and !isleader}">
+                        <input type="button" class="studybtn btn btn-danger" method="delete" url="/study/members"
+                               value="철회">
+                    </th:block>
+                </div>
+            </div>
+        </div>
+        <div th:include="fragments/utternce"></div>
+    </th:block>
+</div>
+
+<!-- Model -->
+<div class="modal fade" id="requestBox" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestBoxLabel">신청자수 : <a id="requestTotal"></a></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="requestList" class="modal-body p-0 overflow-auto" style="max-height: 400px; min-height: 200px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/study.js}"></script>
+
+<!-- footer include -->
+<th:block th:include="fragments/footer"></th:block>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+    <script src="https://cdn.ckeditor.com/ckeditor5/17.0.0/classic/ckeditor.js"></script>
+</head>
+
+<body id="page-top">
+<!-- Navigation -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container mt-5">
+    <form id="forms" method="post" th:object="${content}" th:action="@{/board/new}" autocomplete="off">
+        <div class="form-group mb-3">
+            <label th:for="title">제목</label>
+            <input type="text" id="title" maxlength="200" class="form-control" th:field="*{title}"
+                   placeholder="제목을 입력해 주세요">
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="content">내용</label>
+            <textarea class="form-control" rows="20" id="editer" th:field="*{content}"
+                      placeholder="내용을 입력해 주세요"></textarea>
+            <script>
+                let editor;
+                ClassicEditor
+                    .create(document.querySelector('#editer'), {
+                        removePlugins: ['ImageUpload'],
+                        height: 500
+                    })
+                    .then(newEditor => {
+                        editor = newEditor;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            </script>
+        </div>
+        <div class="form-group" align="right">
+            <input type="button" id="submitbtn" value="저장" class="btn btn-primary">
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    const limit_title = 4;
+
+    $(document).ready(function () {
+        $('#submitbtn').click(function () {
+            var title = $('#title').val().trim();
+            var content = editor.getData();
+
+            if (title.length < limit_title) {
+                alert('제목은 ' + limit_title + '글자이상 입력해주세요.');
+                $('#boardtitle').focus();
+                return;
+            }
+            if (content.length == 0) {
+                alert('본문에 내용을 입력해주세요.');
+                $('.ck-editor__editable').focus();
+                return;
+            }
+
+            var data = {
+                title: title,
+                content: content
+            };
+
+            $.ajax({
+                type: 'post',
+                url: '/board',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (contentId) {
+                    if (contentId == 0) {
+                        alert('등록에 실패하였습니다.');
+                        return;
+                    }
+                    location.replace('/board/' + contentId);
+                },
+                error: function () {
+                    alert('오류가 발생하였습니다.');
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Footer -->
+<th:block th:include="fragments/footer"></th:block>
+</body>
+</html>

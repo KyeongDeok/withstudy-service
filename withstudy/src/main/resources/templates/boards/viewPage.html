@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+</head>
+
+<body id="page-top">
+<!-- Navigation -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container px-5 mt-5">
+    <div class="row mx-5 px-5 mb-2" style="font-weight: normal">
+        <h3 class="label" th:text="${content?.getTitle()}"></h3>
+    </div>
+    <div class="row mx-5 px-5" style="font-size: small; color: gray">
+        <div class="col-xs-2">
+            <a>작성일&nbsp;&nbsp;</a>
+        </div>
+        <div class="col-xs-2 mr-3">
+            <a th:text="${content?.getCreateDate()}"></a>
+        </div>
+        <div class="col-xs-2">
+            <a>조회수&nbsp;&nbsp;</a>
+        </div>
+        <div class="col-xs-2">
+            <a th:text="${content?.getViewCount()}"></a>
+        </div>
+        <div class="col text-right" style="color: black">
+            <a th:text="${content?.getMember().getNickname()}"
+               th:href="@{${'/user/' + content?.getMember().getUid()}}"></a>
+        </div>
+    </div>
+    <hr>
+    <div class="row mx-5 px-5 pt-3" style="min-height: 500px">
+        <div th:utext="${content?.getContent()}"></div>
+    </div>
+    <div class="row mt-4 mx-5 px-5 pt-3" th:if="${session.user?.getUid() eq content?.getMember().getUid()}">
+        <div class="col text-right">
+            <a class="mr-2" th:href="${'/board/' + content?.getId()} + '/edit'">
+                <button class="btn btn-primary">수정</button>
+            </a>
+            <a id="deletebtn">
+                <input type="hidden" id="delete-id" th:value="${content?.getId()}">
+                <button class="btn btn-danger">삭제</button>
+            </a>
+        </div>
+    </div>
+    <div th:include="fragments/utternce"></div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#deletebtn').click(function () {
+            if (confirm("삭제하시겠습니까?") == false) return;
+            var data = $('#delete-id').val();
+
+            $.ajax({
+                type: 'delete',
+                url: '/board/' + data
+            }).done(function () {
+                location.replace('/board');
+            }).fail(function (e) {
+                alert(JSON.stringify(e))
+            });
+        });
+    });
+</script>
+
+<!-- Footer -->
+<th:block th:include="fragments/footer"></th:block>
+</body>
+</html>

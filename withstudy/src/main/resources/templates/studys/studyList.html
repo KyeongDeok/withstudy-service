@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="fragments/header"></th:block>
+</head>
+<body class="bg-light" style="height: 1500px">
+<!-- nav include -->
+<th:block th:include="fragments/nav"></th:block>
+
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h1 class="text-center">스터디 목록</h1>
+        <div class="text-center">
+            <a th:href="@{'/study/new'}">
+                <button class="btn border-primary btn-outline-primary ml-auto">스터디 만들러 가기</button>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4" th:each="studys : ${studyRoomDtos}">
+                    <div class="card mb-4 shadow-sm">
+                        <svg class="bd-placeholder-img card-img-top" width="100%" height="100">
+                            <rect class="studyimg" width="100%" height="100%" fill="#000000"></rect>
+                        </svg>
+                        <div class="card-body">
+                            <p class="study-title card-text stretched-link font-weight-bold text-right"
+                               th:text="${studys.getStudyName()}" style="text-overflow: ellipsis;"></p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a th:text="${studys.getRegTime()}"></a>
+                                <a th:text="${studys.getJoinMember()} + ' / ' + ${studys.getLimitMember()}"></a>
+                                <span th:classappend="${#strings.equals(studys.getStatus(), 'READY') ? 'badge-secondary' : 'badge-danger'}" class="badge">
+                                    <small th:text="${studys.getStatus()}"></small>
+                                </span>
+                            </div>
+                            <a th:href="@{'/study/' + ${studys.getId()}}" class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.studyimg').each(function (index, item) {
+            var colorCode = "#" + Math.round(Math.random() * 0xffffff).toString(16);
+            $(item).css("fill", colorCode);
+        });
+    });
+
+    var check = true;
+    var prepath = "[[${prepath}]]";
+    var lastId = "[[${lastId}]]";
+
+    $(window).scroll(function () {
+        if (check && $(window).scrollTop() >= $(document).height() - $(window).height()) {
+            $.ajax({
+                type: 'get',
+                contentType: 'application/json',
+                url: '/study/' + prepath + '?size=' + 10 + '&lastId=' + lastId,
+                success: function (data) {
+                    var newTag = "";
+
+                    for (var i = 0; i < data.length; i++) {
+                        var id = data[i].id;
+                        var sname = data[i].studyName;
+                        var limit = data[i].limitMember;
+                        var joinnum = data[i].joinMember;
+                        var status = data[i].status;
+                        var regTime = data[i].regTime;
+                        var colorCode = "#" + Math.round(Math.random() * 0xffffff).toString(16);
+
+                        newTag += '<div class="col-md-4">';
+                        newTag += '  <div class="card mb-4 shadow-sm">';
+                        newTag += '    <svg class="bd-placeholder-img card-img-top" width="100%" height="100">';
+                        newTag += '        <rect class="studyimg" width="100%" height="100%" fill="' + colorCode + '"></rect>';
+                        newTag += '    </svg>';
+                        newTag += '    <div class="card-body">';
+                        newTag += '      <p class="card-text stretched-link font-weight-bold text-right" href="#">' + sname + '</p>';
+                        newTag += '      <div class="d-flex justify-content-between align-items-center">';
+                        newTag += '          <a>' + regTime + '</a>';
+                        newTag += '          <a>' + joinnum + ' / ' + limit + '</a>';
+                        newTag += '        <small class="text-muted">' + status + '</small>';
+                        newTag += '      </div>';
+                        newTag += '      <a href="/study/' + id + '" class="stretched-link"></a>';
+                        newTag += '    </div>';
+                        newTag += '  </div>';
+                        newTag += '</div>';
+
+                        lastId = Math.min(data[i].id, lastId);
+                    }
+                    if (newTag.length > 0)
+                        $('.row').append(newTag);
+
+                    if (data.length == 0) {
+                        check = false;
+                    }
+                },
+                error: function () {
+                    alert('실패');
+                }
+            });
+        }
+    });
+</script>
+
+<th:block th:include="fragments/footer"></th:block>
+</body>
+</html>
